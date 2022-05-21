@@ -77,11 +77,8 @@ def trend(start_year, end_year, SIE):
         a_den = a_den + ((x[i]-x_mean)*(x[i]-x_mean))
     
     a = a_num/a_den
-    
     b = SIE_mean - a*x_mean
-    
     Y = b + a*x
-    
     Trend_last_value = Y[-1] + a 
     
     return(Y, Trend_last_value)
@@ -112,7 +109,6 @@ def Mean_Var(start_year, end_year, month):
         m = 0
         
         for j in range(i+2):
-
             if not np.isnan(SIE_month[j]):
                 SIE_month_sums[i] = SIE_month_sums[i] + SIE_month[j]
                 n = n + 1
@@ -151,7 +147,6 @@ def Forecast_system(start_year, end_year, n_month):
     SIE_sept_means, VAR_SIE_sept, SIE_sept = Mean_Var(start_year, end_year, 9)
     
     for i in range(Delta_years-2):
-    
         n = 0
         if n_month > 1:
             Standard_dev[i] = ((VAR_SIE_sept[i] + np.sum(VAR_SIE_month.T[i]))/(i+2))**(1/2)#The .T is to transpose the matrix of month in order to sum correclty the variance of each month until the year [i]
@@ -166,7 +161,6 @@ def Forecast_system(start_year, end_year, n_month):
         Anomaly[i] = Anomaly[i]/n #warning for n_month = 1 or 2 is expected -> artifical value of mean_value is automaticly assigned for i = 5
         
         Mean_values[i] = SIE_sept_means[i] + Anomaly[i]
-
     
     if n_month == 1 or n_month == 2:
         Mean_values[5] = (Mean_values[4] + Mean_values[6])/2
@@ -278,9 +272,7 @@ def Event_forecast(start_year, end_year, Event):#end_year = dernière année de 
 def Proba_forcast(start_year, end_year):
     
     fig3, ax3 = plt.subplots()
-    
     years = np.arange(start_year,end_year+1)
-    
     P_prediction = P
     
     if end_year == 2022:
@@ -297,7 +289,6 @@ def Proba_forcast(start_year, end_year):
             Proba_color[i] = "#FF5733"
     
     ax3.bar(years, P_prediction, color = Proba_color)
-    #ax3.plot(years, O_f, '.', color = "red")
     ax3.set_title('Prediction probabilities of event')
     plt.savefig("Predi_proba", dpi = 900)
     plt.show()
@@ -341,7 +332,6 @@ def plot_time_series(trend_start_year, trend_end_year):#aurguments uniquments ut
     ax.xaxis.set_major_formatter(formatter)
     
     ax.plot(dates_sept, SIE_sept)
-    #ax.plot(dates_may, SIE_may)
     ax.plot(dates_mu, mu)
     ax.fill_between(dates_mu, mu - 2*sigma, mu + 2*sigma, alpha = 0.5)
     
@@ -366,8 +356,6 @@ if end_year <= 2021:
 elif end_year == 2022:
     dates_sept, SIE_sept = Time_series(start_year, end_year-1, 9)
     dates_mu = np.append(dates_sept[2:], dates_sept[-1] + relativedelta(years=1))
-    
-#dates_may, SIE_may = Time_series(start_year, end_year, 5)
 
 mu_1, sigma, VAR_sept = Forecast_system(start_year, end_year, Total_number_of_month)
 
@@ -432,6 +420,6 @@ def Video_time_series():
     ani.save('SIE_predi_movie.mp4', writer=writervideo, dpi = 400)
     plt.close()
 
-#Video_time_series()
+Video_time_series()
 
 
