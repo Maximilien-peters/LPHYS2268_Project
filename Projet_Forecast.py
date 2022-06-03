@@ -6,7 +6,6 @@ Created on Sun Mar 20 15:34:20 2022
 @author: maximilienpeters
 """
 import numpy as np
-from sklearn.linear_model import LinearRegression
 import statistics as st
 import matplotlib.pyplot as plt
 import datetime
@@ -38,7 +37,7 @@ def Time_series(start_year, end_year, m):#get a time series of the desired month
     dates_list = []
     Delta_years = (end_year+1-start_year)
     
-    if end_year == 2022 and m >= 5:
+    if end_year == 2022 and m > 5:
         Delta_years = Delta_years-1
     
     SIE = np.zeros(Delta_years)
@@ -136,9 +135,6 @@ def Mean_Var(start_year, end_year, month):
     if month > 9:
         SIE_month = np.insert(SIE_month[:Delta_years-1], 0, np.nan) #Add NaN for October-November-December of 1978 explained by the fact that we don't have data for 1978
     
-    if end_year == 2022 and month == 5: #remplacement provisoire par NaN de la valeure de mai 2022 tant qu'on n'a pas la donnée (sera disponible le 2 juin)
-        SIE_month = np.append(SIE_month, np.nan)
-    
     for i in range(Delta_years-2):
         n = 0
         m = 0
@@ -177,7 +173,7 @@ def Forecast_system(start_year, end_year, n_month):
         month = 5 - (n_month-1) + j
         if month <= 0:
             month = 12 + month
-            
+        
         SIE_month_means[j], VAR_SIE_month[j], SIE_month[j] = Mean_Var(start_year, end_year, month)
     
     SIE_sept_means, VAR_SIE_sept, SIE_sept = Mean_Var(start_year, end_year, 9)
@@ -186,7 +182,7 @@ def Forecast_system(start_year, end_year, n_month):
     
         n = 0
         if n_month > 1:
-            Standard_dev[i] = ((VAR_SIE_sept[i] + np.sum(VAR_SIE_month.T[i]))/(i+2))**(1/2)#The .T is to transpose the matrix of month in order to sum correclty the variance of each month until the year i
+            Standard_dev[i] = ((VAR_SIE_sept[i] + np.sum(VAR_SIE_month.T[i]))/(i+2))**(1/2)#The .T transpose the matrix of month in order to sum correclty the variance of each month until the year i
         else: 
             Standard_dev[i] = ((VAR_SIE_sept[i] + VAR_SIE_month[0][i])/(i+2))**(1/2)
         
@@ -212,7 +208,7 @@ def Forecast_correction(data_start_year, data_end_year):
     else:
         bias = mu_1 - SIE_sept[2:]
         
-    mean_bias = np.sum(bias)/np.size(bias)
+    mean_bias = np.sum(bias)/np.size(bias) #first correction bias of the mean
     
     if data_end_year == 2022:
         Trend_obs, Trend_last_value = trend(data_start_year, data_end_year-1, SIE_sept)
@@ -221,10 +217,6 @@ def Forecast_correction(data_start_year, data_end_year):
         Trend_obs, Trend_last_value = trend(data_start_year, data_end_year, SIE_sept)
     
     new_mu_1 = (mu_1 - mean_bias) #bias of the mean
-    
-    #std_obs = st.stdev(SIE_sept[2:])
-    #std_f = st.stdev(mu_1)
-    #new_mu_2 = (new_mu_1 - np.mean(new_mu_1))*(std_obs/std_f) + np.mean(new_mu_1) #bias of the variability 
     
     Trend_mean_values, E_1 = trend(data_start_year+2, data_end_year, new_mu_1)
     new_mu_3 = mu_1 - Trend_mean_values + Trend_obs[2:] #bias of the trend
@@ -253,7 +245,7 @@ def plot_Bias():
     plt.show()
 
 
-def Event_forecast(start_year, end_year, Event):#end_year = dernière année de verficiation de l'event / Event = 1 -> trend line event, Event = 3 -> less than previous year event
+def Event_forecast(start_year, end_year, Event):#end_year = last verification year / Event = 1 -> trend line event, Event = 3 -> less than previous year event
     
     Delta_years = (end_year+1-start_year)
     E = np.zeros(Delta_years-2)
@@ -341,7 +333,6 @@ def Brier_skill_score():
     BS_ref = 0
     
     for i in range(np.size(P)):
-        
         BS = BS + (P[i] - E_O[i])**2
         
     BS_ref = (O_f[-1]) * (1 - (O_f[-1]))
@@ -352,7 +343,7 @@ def Brier_skill_score():
     return(BSS, BS, BS_ref)
 
 
-def plot_reliability_diagram():#test
+def plot_reliability_diagram():
     
     fig2, ax2 = plt.subplots(constrained_layout=True)
     
@@ -362,7 +353,7 @@ def plot_reliability_diagram():#test
     plt.show()
     
 
-def plot_time_series(trend_start_year, trend_end_year):#aurguments uniquments utiles à l'affichage de la trend selon la période désirée
+def plot_time_series(trend_start_year, trend_end_year):
     
     fig, ax = plt.subplots(constrained_layout=True)
     locator = mdates.AutoDateLocator()
@@ -372,7 +363,7 @@ def plot_time_series(trend_start_year, trend_end_year):#aurguments uniquments ut
     
     ax.plot(dates_sept, SIE_sept, label = 'Observed SIE')
     ax.plot(dates_mu, mu, label = 'Prediected SIE')
-    ax.fill_between(dates_mu, mu - 2*sigma, mu + 2*sigma, alpha = 0.5)
+    ax.fill_between(dates_mu, mu - 2*sigma, mu + 2*sigma, alpha = 0.5, label = "95\% CI")
     
     Y, E = trend(trend_start_year, trend_end_year, SIE_sept)
     
@@ -424,7 +415,9 @@ P_event_2022 = Proba_forcast(start_year+2, end_year)
 
 BSS, BS, BS_ref = Brier_skill_score()
 
-print("P_event_2022 = ", P_event_2022)
+print("Predicted Probability of event in 2022 is ", P_event_2022)
+
+print("Predicted September SIE for 2022 is ", mu[-1], " km2")
 
 print("BSS = ", BSS, "\n", "BS = ", BS, "\n", "BS_ref = ", BS_ref)
 
@@ -466,6 +459,6 @@ def Video_time_series():
     ani.save('SIE_predi_movie.mp4', writer=writervideo, dpi = 400)
     plt.close()
 
-#Video_time_series()
+Video_time_series()
 
 
