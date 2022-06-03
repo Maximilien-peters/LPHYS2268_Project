@@ -6,7 +6,6 @@ Created on Sun Mar 20 15:34:20 2022
 @author: maximilienpeters
 """
 import numpy as np
-import statistics as st
 import matplotlib.pyplot as plt
 import datetime
 from dateutil.relativedelta import relativedelta
