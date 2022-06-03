@@ -22,7 +22,7 @@ rc('text', usetex=True)
 
 #------------------------------------------------------------------------------------------
 
-file = open('time_series.txt', 'r')
+file = open('time_series.txt', 'r') #see data file "Time_series.txt" for data format
 
 list_of_lists = []
 for line in file:
