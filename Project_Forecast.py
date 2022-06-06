@@ -306,20 +306,25 @@ def Proba_forcast(start_year, end_year):
     if end_year == 2022:
         P_prediction = np.append(P, norm.cdf((SIE_sept[-1] - mu[-1])/sigma[-1]))
     
-    Proba_color = ['colors']*np.size(P_prediction)
+    P_predi_E = np.zeros(np.size(P_prediction))
+    P_predi_N = np.zeros(np.size(P_prediction))
+    P_predi_L = np.zeros(np.size(P_prediction))
     
     for i in range(np.size(P_prediction)):
         if i == np.size(P_prediction)-1 and end_year == 2022:
-            Proba_color[i] = '#1F92D5'
+            P_predi_L[i] = P_prediction[i]
         elif E_O[i] == 1:
-            Proba_color[i] = "#50D51F"
+            P_predi_E[i] = P_prediction[i]
         else:
-            Proba_color[i] = "#FF5733"
-    
-    ax3.bar(years, P_prediction, color = Proba_color, label = 'Event')
+            P_predi_N[i] = P_prediction[i]
+            
+    ax3.bar(years, P_predi_E, color = "#50D51F", label = 'Event')
+    ax3.bar(years, P_predi_N, color = "#FF5733", label = 'No event')
+    ax3.bar(years, P_predi_L, color = "#1F92D5", label = '2022 Prediction')
+        
     ax3.set_xlabel('Year')
     ax3.set_ylabel('Predicted probability')
-    plt.legend()
+    plt.legend(frameon = True, facecolor = 'white', framealpha = 0.7, loc = "upper left")
     plt.savefig("Predi_proba", dpi = 900)
     plt.show()
     
@@ -361,7 +366,7 @@ def plot_time_series(trend_start_year, trend_end_year):
     ax.xaxis.set_major_formatter(formatter)
     
     ax.plot(dates_sept, SIE_sept, label = 'Observed SIE')
-    ax.plot(dates_mu, mu, label = 'Prediected SIE')
+    ax.plot(dates_mu, mu, label = 'Predicted SIE')
     ax.fill_between(dates_mu, mu - 2*sigma, mu + 2*sigma, alpha = 0.5, label = "95\% CI")
     
     Y, E = trend(trend_start_year, trend_end_year, SIE_sept)
@@ -395,6 +400,7 @@ elif end_year == 2022:
 mu_1, sigma, VAR_sept = Forecast_system(start_year, end_year, Total_number_of_month)
 
 mu = Forecast_correction(start_year, end_year)
+
 
 if end_year <= 2021:
     plot_time_series(start_year,end_year)
@@ -441,7 +447,7 @@ def Video_time_series():
         array_x.append(dates[n])
         ax.fill_between(array_x, array_y3, array_y4, color = "#98D0F0")
         ax.plot(array_x, array_y1, color = "tab:blue", label = 'Observed SIE')
-        ax.plot(array_x, array_y2, color = "tab:orange", label = 'Prediected SIE')
+        ax.plot(array_x, array_y2, color = "tab:orange", label = 'Predicted SIE')
         ax.set_xlabel('Year')
         ax.set_ylabel('Sea ice extent (km$^2$)')
 
